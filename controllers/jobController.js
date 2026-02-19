@@ -4,10 +4,7 @@ export const postJob = async (req, res) => {
   try {
     const { title, description, requirements, salary, location, jobType, experience, position, companyId } = req.body;
     const userId = req.id;
-    
-    if (!userId) {
-      return res.status(401).json({ message: 'User not authenticated. Please login to post a job', success: false });
-    }
+
     if (!title || !description || !requirements || !salary || !location || !jobType || !experience || !position || !companyId) {
       return res.status(400).json({
         message: "Please provide all required fields",
@@ -15,16 +12,7 @@ export const postJob = async (req, res) => {
       });
     }
     const job = await Job.create({
-      title,
-      description,
-      requirements: typeof requirements === 'string' ? requirements.split(',') : requirements,
-      salary: Number(salary),
-      location,
-      jobType,
-      experience,
-      position,
-      company: companyId,
-      created_by: userId,
+      title, description, requirements: requirements.split(","), salary: Number(salary), location, jobType, experience, position, company: companyId, created_by: userId,
     });
     return res.status(200).json({
       message: "New Job Created Successfully",
@@ -32,11 +20,11 @@ export const postJob = async (req, res) => {
       success: true
     });
   } catch (err) {
-    console.error('postJob error:', err);
+    console.log(err)
     return res.status(500).json({
-      message: "Server error while creating job",
+      message: "Server error",
       success: false,
-      err: err.message || err
+      err
     });
   }
 }

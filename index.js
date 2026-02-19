@@ -5,14 +5,6 @@ import dotenv from 'dotenv';
 import mongoose from "mongoose";
 dotenv.config({});
 
-// Validate critical environment variables
-const requiredEnvVars = ['MONGODB_URL', 'SECRET_KEY'];
-const missing = requiredEnvVars.filter(v => !process.env[v]);
-if (missing.length > 0) {
-  console.error(`❌ Missing required environment variables: ${missing.join(', ')}`);
-  console.error('Please set these variables in Vercel project settings or your .env file');
-}
-
 const app = express();
 
 import userRoute from './routes/userRoute.js';

@@ -2,7 +2,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import connectDB from './utils/db.js';
+import mongoose from "mongoose";
 dotenv.config({});
 
 const app = express();
@@ -32,7 +32,10 @@ app.use('/api/v1/company', companyRoute);
 app.use('/api/v1/job', JobRoute);
 app.use('/api/v1/application', applicationRoute);
 
-connectDB();
-
+mongoose.connect(process.env.MONGODB_URL).then(() => {
+  console.log("Mongoose connect Successfully");
+}).catch((err) => {
+  console.log("Error while connecting to MongoDB", err);
+});
 
 export default app;

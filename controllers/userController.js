@@ -15,7 +15,7 @@ export const register = async (req, res) => {
         success: false
       });
     };
-    
+
     const file = req.file; // may be undefined if user didn't choose one
 
     let cloudResponse;
@@ -54,11 +54,11 @@ export const register = async (req, res) => {
       success: true
     });
   } catch (err) {
-    console.log(err)
+    console.error('Register error:', err.message || err);
     return res.status(500).json({
-      message: "Server error",
+      message: "Server error during registration",
       success: false,
-      err
+      err: err.message || err
     });
   }
 }
@@ -97,7 +97,10 @@ export const login = async (req, res) => {
     const tokenData = {
       userId: user._id
     }
-    const token = await jwt.sign(tokenData, process.env.SECRET_KEY, { expiresIn: '1d' });
+    if (!process.env.SECRET_KEY) {
+      throw new Error('SECRET_KEY environment variable is not set');
+    }
+    const token = jwt.sign(tokenData, process.env.SECRET_KEY, { expiresIn: '1d' });
     user = {
       _id: user._id,
       fullName: user.fullName,
@@ -107,33 +110,33 @@ export const login = async (req, res) => {
       profile: user.profile
     }
 
-    return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpsOnly: true, sameSite: 'strict' }).json({
+    return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true, sameSite: 'none' }).json({
       message: `Welcome back ${user.fullName}`,
       user,
       success: true
     });
   } catch (err) {
-    console.log(err)
+    console.error('Login error:', err.message || err);
     return res.status(500).json({
-      message: "Server error",
+      message: "Server error during login",
       success: false,
-      err
+      err: err.message || err
     });
   }
 }
 
 export const logout = async (req, res) => {
   try {
-    return res.status(200).cookie("token", "", { maxAge: 0 }).json({
+    return res.status(200).cookie("token", "", { maxAge: 0, httpOnly: true, secure: true, sameSite: 'none' }).json({
       message: "LogOut Successfully",
       success: true,
     })
   } catch (err) {
-    console.log(err)
+    console.error('Logout error:', err.message || err);
     return res.status(500).json({
       message: "Server error",
       success: false,
-      err
+      err: err.message || err
     });
   }
 }

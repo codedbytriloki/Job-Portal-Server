@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 dotenv.config({});
 
 // Validate critical environment variables
-const requiredEnvVars = ['MONGO_URI', 'SECRET_KEY'];
+const requiredEnvVars = ['MONGODB_URL', 'SECRET_KEY'];
 const missing = requiredEnvVars.filter(v => !process.env[v]);
 if (missing.length > 0) {
   console.error(`❌ Missing required environment variables: ${missing.join(', ')}`);

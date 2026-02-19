@@ -196,11 +196,11 @@ export const updateProfile = async (req, res) => {
     });
 
   } catch (err) {
-    console.log(err)
+    console.error('Register error:', err.message || err);
     return res.status(500).json({
-      message: "Server error",
+      message: "Server error during registration",
       success: false,
-      err
+      err: err.message || err
     });
   }
 }

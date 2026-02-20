@@ -2,29 +2,85 @@ import { Job } from '../models/job_model.js';
 // admin port job
 export const postJob = async (req, res) => {
   try {
-    const { title, description, requirements, salary, location, jobType, experience, position, companyId } = req.body;
+    // log the incoming payload so we can inspect it when running in production
+    console.log('postJob body:', req.body);
+
+    const {
+      title,
+      description,
+      requirements,
+      salary,
+      location,
+      jobType,
+      experience,
+      position,
+      companyId
+    } = req.body;
     const userId = req.id;
 
-    if (!title || !description || !requirements || !salary || !location || !jobType || !experience || !position || !companyId) {
+    // basic presence validation
+    if (
+      !title ||
+      !description ||
+      !requirements ||
+      salary === undefined ||
+      !location ||
+      !jobType ||
+      experience === undefined ||
+      position === undefined ||
+      !companyId
+    ) {
       return res.status(400).json({
-        message: "Please provide all required fields",
+        message: 'Please provide all required fields',
         success: false
       });
     }
+
+    // coerce numeric values and validate
+    const salaryNum = Number(salary);
+    const experienceNum = Number(experience);
+    const positionNum = Number(position);
+    if (isNaN(salaryNum) || isNaN(experienceNum) || isNaN(positionNum)) {
+      return res.status(400).json({
+        message: 'Salary, experience and position must be valid numbers',
+        success: false
+      });
+    }
+
     const job = await Job.create({
-      title, description, requirements: requirements.split(","), salary: Number(salary), location, jobType, experience, position, company: companyId, created_by: userId,
+      title,
+      description,
+      requirements: requirements.split(',').map(r => r.trim()).filter(Boolean),
+      salary: salaryNum,
+      location,
+      jobType,
+      experience: experienceNum,
+      position: positionNum,
+      company: companyId,
+      created_by: userId,
     });
+
     return res.status(200).json({
-      message: "New Job Created Successfully",
+      message: 'New Job Created Successfully',
       job,
       success: true
     });
   } catch (err) {
-    console.log(err)
+    console.error('postJob error', err);
+
+    // return mongoose validation errors with 400 so front end can handle them
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({
+        message: err.message,
+        success: false,
+        errors: err.errors
+      });
+    }
+
     return res.status(500).json({
-      message: "Server error",
+      message: 'Server error',
       success: false,
-      err
+      err: err.message || err
     });
   }
 }
